@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; Charset=UTF-8">
+<script type="text/javascript" src="jquery.js"></script>
+</head>
+
+<body>
+	
+	<p>Выберете знак</p>
+	<a id="aries" href="#">Aries<img src="aries.png" 
+  width="200" height="200" alt="Aries"></a>
+	<a id="taurus" href="#">Taurus<img src="taurus.png" 
+  width="200" height="200" alt="Taurus"></a>
+ <a id="gemini" href="#">Gemini<img src="gemini.png" 
+  width="200" height="200" alt="Gemini"></a>
+	
+	<div id="content"></div>
+	
+	<script>
+		$(document).ready(function(){
+		
+			$('#aries').click(function(){
+				$.ajax({
+					url: "aries.html",
+					cache: false,
+					success: function(html){
+						$("#content").html(html);
+					}
+				});
+			});
+			
+			$('#taurus').click(function(){
+				$.ajax({
+					url: "taurus.html",
+					cache: false,
+					success: function(html){
+						$("#content").html(html);
+					}
+				});
+			});
+			$('#gemini').click(function(){
+				$.ajax({
+					url: "gemini.html",
+					cache: false,
+					success: function(html){
+						$("#content").html(html);
+					}
+				});
+			});
+			
+		});
+	</script>
+	
+</body>
+</html>
