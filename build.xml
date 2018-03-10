@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="project name" default="build">
+    <!-- By default, we assume all tools to be on the $PATH -->
+    <property name="toolsdir" value=""/>
+
+    <!-- Uncomment the following when the tools are in ${basedir}/vendor/bin -->
+    <!-- <property name="toolsdir" value="${basedir}/vendor/bin/"/> -->
+
+    <target name="build"
+            depends="composerInstall,composerDump,lint"
+            description="Main build"/>
+
+    <target name="build-parallel"
+            depends="lint"
+            description="Parallel build"/>
+
+    <target name="lint"
+            unless="lint.done"
+            description="Perform syntax check of sourcecode files">
+        <apply executable="php" failonerror="true" taskname="lint">
+            <arg value="-l"/>
+
+            <fileset dir="${basedir}/module">
+                <include name="**/*.php"/>
+                <modified/>
+            </fileset>
+
+            <!--<fileset dir="${basedir}/tests">-->
+            <!--<include name="**/*.php"/>-->
+            <!--<modified/>-->
+            <!--</fileset>-->
+        </apply>
+
+        <property name="lint.done" value="true"/>
+    </target>
+
+    <property name="composer" value="${basedir}/composer.phar"/>
+
+    <target name="php-check">
+        <condition property="php" value="php">
+            <not>
+                <isset property="{php}"/>
+            </not>
+        </condition>
+    </target>
+
+    <property name="builddir" value="${basedir}/build"/>
+    <property name="data_logs" value="${basedir}/data/logs"/>
+    <property name="doctrine_dir" value="${basedir}/data/DoctrineORMModule"/>
+    <property name="doctrine_dir_migrations" value="${basedir}/data/DoctrineORMModule/Migrations"/>
+    <property name="doctrine_dir_proxy" value="${basedir}/data/DoctrineORMModule/Proxy"/>
+
+    <target name="prepare">
+        <mkdir dir="${builddir}"/>
+        <mkdir dir="${data_logs}"/>
+        <mkdir dir="${doctrine_dir}"/>
+        <mkdir dir="${doctrine_dir_migrations}"/>
+        <mkdir dir="${doctrine_dir_proxy}"/>
+
+        <chmod dir="${builddir}" perm="777" failonerror="true"/>
+        <chmod dir="${data_logs}" perm="777" failonerror="true"/>
+        <chmod dir="${doctrine_dir}" perm="777" failonerror="true"/>
+        <chmod dir="${doctrine_dir_migrations}" perm="777" failonerror="true"/>
+        <chmod dir="${doctrine_dir_proxy}" perm="777" failonerror="true"/>
+
+    </target>
+
+    <target name="composer-check" depends="prepare">
+        <available file="${composer}" property="composer.present"/>
+    </target>
+
+    <target name="composer-download" depends="composer-check" unless="composer.present">
+        <property name="composer.noselfupdate" value="true"/>
+        <get src="https://getcomposer.org/composer.phar" dest="${composer}"/>
+    </target>
+
+    <target name="composer-selfupdate" depends="php-check,composer-download" unless="composer.noselfupdate">
+        <exec executable="${php}">
+            <arg value="${composer}"/>
+            <arg value="self-update"/>
+            <arg value="--quiet"/>
+        </exec>
+    </target>
+
+    <target name="composerInstall" depends="composer-selfupdate" unless="composer.noupdate"
+            description="Run composer update">
+        <exec executable="${php}" failonerror="true">
+            <arg value="${composer}"/>
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <target name="composerDump" depends="composerInstall" description="Run composer dump-autoload">
+        <exec executable="${php}" failonerror="true">
+            <arg value="${composer}"/>
+            <arg value="dump-autoload"/>
+            <arg value="-o"/>
+        </exec>
+    </target>
+</project>
